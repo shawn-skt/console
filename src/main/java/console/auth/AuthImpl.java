@@ -10,6 +10,7 @@ import org.fisco.bcos.sdk.contract.auth.manager.AuthManager;
 import org.fisco.bcos.sdk.contract.auth.po.AuthType;
 import org.fisco.bcos.sdk.contract.auth.po.ProposalInfo;
 import org.fisco.bcos.sdk.crypto.keypair.CryptoKeyPair;
+import org.fisco.bcos.sdk.model.PrecompiledRetCode;
 import org.fisco.bcos.sdk.model.RetCode;
 import org.fisco.bcos.sdk.model.TransactionReceipt;
 import org.fisco.bcos.sdk.transaction.codec.decode.ReceiptParser;
@@ -185,8 +186,7 @@ public class AuthImpl implements AuthFace {
             }
             ConsoleUtils.printJson(proposalInfo.toString());
         } catch (NumberFormatException e) {
-            throw new Exception(
-                    "Number convert error, please check number you input", e.getCause());
+            System.out.println("Number convert error, please check proposal id you input.");
         }
     }
 
@@ -198,9 +198,13 @@ public class AuthImpl implements AuthFace {
     @Override
     public void getContractAdmin(String[] params) throws Exception {
         String contractAddress = params[1];
-        checkValidAddress(contractAddress, "");
-        String admin = authManager.getAdmin(contractAddress);
-        System.out.println("Admin for contract " + contractAddress + " is: " + admin);
+        try {
+            checkValidAddress(contractAddress, "");
+            String admin = authManager.getAdmin(contractAddress);
+            System.out.println("Admin for contract " + contractAddress + " is: " + admin);
+        } catch (TransactionException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
     }
 
     @Override
@@ -214,6 +218,32 @@ public class AuthImpl implements AuthFace {
             System.out.println("Deploy strategy is Black List Access.");
         } else {
             System.out.println("Deploy strategy is UNKNOWN, please check node status.");
+        }
+    }
+
+    @Override
+    public void checkDeployAuth(ConsoleInitializer consoleInitializer, String[] params)
+            throws Exception {
+        String accountAddress =
+                (params.length == 1)
+                        ? consoleInitializer
+                                .getClient()
+                                .getCryptoSuite()
+                                .getCryptoKeyPair()
+                                .getAddress()
+                        : params[1];
+        checkValidAddress(accountAddress, "accountAddress");
+        try {
+            checkValidAddress(accountAddress, "accountAddress");
+            Boolean hasDeployAuth = authManager.hasDeployAuth(accountAddress);
+            System.out.println(
+                    "Deploy :"
+                            + ((hasDeployAuth)
+                                    ? "\033[32m" + "ACCESS" + "\033[m"
+                                    : "\033[31m" + "PERMISSION DENIED" + "\033[m"));
+            System.out.println("Account: " + accountAddress);
+        } catch (TransactionException e) {
+            System.out.println("Error: " + e.getMessage());
         }
     }
 
@@ -234,13 +264,18 @@ public class AuthImpl implements AuthFace {
             } else if (type.equals("black_list")) {
                 setResult = authManager.setMethodAuthType(address, func, AuthType.BLACK_LIST);
             } else {
-                throw new Exception("Error authType, auth type is white_list or black_list");
-            }
-            if (setResult.compareTo(BigInteger.ZERO) != 0) {
-                System.out.println("Set method auth type failed, resultCode is" + setResult);
+                System.out.println("Error authType, auth type is white_list or black_list.");
                 return;
             }
-            System.out.println("Set method auth type success, resultCode is: " + setResult);
+            RetCode precompiledResponse =
+                    PrecompiledRetCode.getPrecompiledResponse(setResult.intValue(), "Success");
+            ConsoleUtils.printJson(
+                    "{\"code\":"
+                            + precompiledResponse.getCode()
+                            + ", \"msg\":"
+                            + "\""
+                            + precompiledResponse.getMessage()
+                            + "\"}");
         } catch (TransactionException e) {
             System.out.println("Error: " + e.getMessage());
         }
@@ -287,6 +322,45 @@ public class AuthImpl implements AuthFace {
                 return;
             }
             System.out.println("Close success, resultCode is: " + openResult);
+        } catch (TransactionException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
+
+    @Override
+    public void checkMethodAuth(ConsoleInitializer consoleInitializer, String[] params)
+            throws Exception {
+        // contract, func, address
+        String contract = params[1];
+        String funcStr = params[2];
+        byte[] hash = consoleInitializer.getClient().getCryptoSuite().hash(funcStr.getBytes());
+        byte[] func = Arrays.copyOfRange(hash, 0, 4);
+        String account =
+                (params.length == 3)
+                        ? consoleInitializer
+                                .getClient()
+                                .getCryptoSuite()
+                                .getCryptoKeyPair()
+                                .getAddress()
+                        : params[3];
+        try {
+            checkValidAddress(contract, "contractAddress");
+            checkValidAddress(account, "accountAddress");
+            Boolean hasAuth = authManager.checkMethodAuth(contract, func, account);
+            logger.debug(
+                    "checkMethodAuth: account:{}, funcStr:{}, func:{}, contract:{}",
+                    account,
+                    funcStr,
+                    func,
+                    contract);
+            System.out.println(
+                    "Method   :"
+                            + ((hasAuth)
+                                    ? "\033[32m" + "ACCESS" + "\033[m"
+                                    : "\033[31m" + "PERMISSION DENIED" + "\033[m"));
+            System.out.println("Account  : " + account);
+            System.out.println("Interface: " + funcStr);
+            System.out.println("Contract : " + contract);
         } catch (TransactionException e) {
             System.out.println("Error: " + e.getMessage());
         }

@@ -202,6 +202,8 @@ public class SupportedCommand {
                     new ArrayList<>(Arrays.asList("quit", "q", "exit")),
                     (consoleInitializer, params, pwd) -> System.exit(0),
                     false);
+    // TODO: Table CRUD service is not supported in FISCO BCOS 3.0.0 rc1
+    /*
 
     public static final CommandInfo DESC =
             new CommandInfo(
@@ -218,31 +220,35 @@ public class SupportedCommand {
                     "Create table by sql",
                     (consoleInitializer, params, pwd) ->
                             consoleInitializer.getPrecompiledFace().createTable(params[0], isWasm));
-    public static final CommandInfo SELECT =
-            new CommandInfo(
-                    "select",
-                    "Select records by sql",
-                    (consoleInitializer, params, pwd) ->
-                            consoleInitializer.getPrecompiledFace().select(params[0]));
-    public static final CommandInfo INSERT =
-            new CommandInfo(
-                    "insert",
-                    "Insert records by sql",
-                    (consoleInitializer, params, pwd) ->
-                            consoleInitializer.getPrecompiledFace().insert(params[0]));
-    public static final CommandInfo UPDATE =
-            new CommandInfo(
-                    "update",
-                    "Update records by sql",
-                    (consoleInitializer, params, pwd) ->
-                            consoleInitializer.getPrecompiledFace().update(params[0]));
-    public static final CommandInfo DELETE =
-            new CommandInfo(
-                    "delete",
-                    "Remove records by sql",
-                    (consoleInitializer, params, pwd) ->
-                            consoleInitializer.getPrecompiledFace().remove(params[0]));
 
+        public static final CommandInfo SELECT =
+                new CommandInfo(
+                        "select",
+                        "Select records by sql",
+                        (consoleInitializer, params, pwd) ->
+                                consoleInitializer.getPrecompiledFace().select(params[0]));
+        public static final CommandInfo INSERT =
+                new CommandInfo(
+                        "insert",
+                        "Insert records by sql",
+                        (consoleInitializer, params, pwd) ->
+                                consoleInitializer.getPrecompiledFace().insert(params[0]));
+        public static final CommandInfo UPDATE =
+                new CommandInfo(
+                        "update",
+                        "Update records by sql",
+                        (consoleInitializer, params, pwd) ->
+                                consoleInitializer.getPrecompiledFace().update(params[0]));
+        public static final CommandInfo DELETE =
+                new CommandInfo(
+                        "delete",
+                        "Remove records by sql",
+                        (consoleInitializer, params, pwd) ->
+                                consoleInitializer.getPrecompiledFace().remove(params[0]));
+     */
+
+    // TODO: Liquid collaboration service is not supported in FISCO BCOS 3.0.0 rc1
+    /*
     public static final CommandInfo INITIALIZE =
             new CommandInfo(
                     "initialize",
@@ -278,6 +284,7 @@ public class SupportedCommand {
                     (consoleInitializer, params, pwd) -> {
                         consoleInitializer.getCollaborationFace().fetch(params);
                     });
+     */
 
     public static final CommandInfo GET_CURRENT_ACCOUNT =
             new CommandInfo(
@@ -673,7 +680,7 @@ public class SupportedCommand {
                     0,
                     0);
 
-    public static final CommandInfo SET_NODENAME =
+    public static final CommandInfo SET_NODE_NAME =
             new CommandInfo(
                     "setNodeName",
                     "Set default node name to send request.",
@@ -690,6 +697,16 @@ public class SupportedCommand {
                     HelpInfo::clearNodeNameHelp,
                     (consoleInitializer, params, pwd) ->
                             consoleInitializer.getConsoleClientFace().clearNodeName(),
+                    0,
+                    0);
+
+    public static final CommandInfo GET_NODE_NAME =
+            new CommandInfo(
+                    "getNodeName",
+                    "Get default node name in this client.",
+                    HelpInfo::getNodeNameHelp,
+                    (consoleInitializer, params, pwd) ->
+                            consoleInitializer.getConsoleClientFace().getNodeName(),
                     0,
                     0);
 
@@ -851,6 +868,21 @@ public class SupportedCommand {
                     false,
                     true);
 
+    public static final CommandInfo CHECK_DEPLOY_AUTH =
+            new CommandInfo(
+                    "checkDeployAuth",
+                    "Check whether account has deploy access.",
+                    HelpInfo::checkDeployAuthHelp,
+                    (consoleInitializer, params, pwd) ->
+                            consoleInitializer
+                                    .getAuthFace()
+                                    .checkDeployAuth(consoleInitializer, params),
+                    0,
+                    1,
+                    false,
+                    false,
+                    true);
+
     public static final CommandInfo SET_METHOD_AUTH_TYPE =
             new CommandInfo(
                     "setMethodAuth",
@@ -896,6 +928,21 @@ public class SupportedCommand {
                     false,
                     true);
 
+    public static final CommandInfo CHECK_METHOD_AUTH =
+            new CommandInfo(
+                    "checkMethodAuth",
+                    "Check method ACL for account in specific contract.",
+                    HelpInfo::checkMethodAuthHelp,
+                    (consoleInitializer, params, pwd) ->
+                            consoleInitializer
+                                    .getAuthFace()
+                                    .checkMethodAuth(consoleInitializer, params),
+                    2,
+                    3,
+                    false,
+                    false,
+                    true);
+
     public static List<String> BFS_COMMANDS =
             new ArrayList<>(
                     Arrays.asList(
@@ -904,25 +951,26 @@ public class SupportedCommand {
                             MAKE_DIR.getCommand(),
                             PWD.getCommand()));
 
+    // TODO: Table CRUD service is not supported in FISCO BCOS 3.0.0 rc1
     public static List<String> CRUD_COMMANDS =
             new ArrayList<>(
                     Arrays.asList(
-                            CREATE.getCommand(),
-                            INSERT.getCommand(),
-                            SELECT.getCommand(),
-                            UPDATE.getCommand(),
-                            DELETE.getCommand()));
+                            // CREATE.getCommand(),
+                            // INSERT.getCommand(),
+                            // SELECT.getCommand(),
+                            // UPDATE.getCommand(),
+                            // DELETE.getCommand()
+                            ));
 
-    public static List<String> NODENAME_COMMANDS =
-            new ArrayList<>(Arrays.asList(SET_NODENAME.getCommand(), CLEAR_NODE_NAME.getCommand()));
-
+    // TODO: Liquid collaboration service is not supported in FISCO BCOS 3.0.0 rc1
     public static List<String> COLLABORATION_COMMANDS =
             new ArrayList<>(
                     Arrays.asList(
-                            INITIALIZE.getCommand(),
-                            SIGN.getCommand(),
-                            EXERCISE.getCommand(),
-                            FETCH.getCommand()));
+                            // INITIALIZE.getCommand(),
+                            // SIGN.getCommand(),
+                            // EXERCISE.getCommand(),
+                            // FETCH.getCommand()
+                            ));
 
     static {
         Field[] fields = SupportedCommand.class.getDeclaredFields();
